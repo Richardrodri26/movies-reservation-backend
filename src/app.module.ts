@@ -7,9 +7,12 @@ import { TheatersModule } from './theaters/theaters.module';
 import { ShowtimesModule } from './showtimes/showtimes.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { CommonModule } from './common/common.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
+    // Provide PrismaService globally by importing PrismaModule once at the root
+    PrismaModule,
     AuthModule,
     UsersModule,
     MoviesModule,
