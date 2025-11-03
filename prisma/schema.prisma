@@ -1,15 +1,86 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(uuid())
+  name        String
+  email       String        @unique
+  password    String
+  role        Role          @default(USER)
+  reservations Reservation[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model Genre {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  movies  Movie[]
+}
+
+model Movie {
+  id          String      @id @default(uuid())
+  title       String
+  description String
+  posterUrl   String?
+  genreId     String
+  genre       Genre       @relation(fields: [genreId], references: [id])
+  showtimes   Showtime[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Theater {
+  id         String    @id @default(uuid())
+  name       String
+  totalSeats Int
+  seats      Seat[]
+  showtimes  Showtime[]
+}
+
+model Seat {
+  id          String      @id @default(uuid())
+  seatNumber  String
+  theaterId   String
+  theater     Theater     @relation(fields: [theaterId], references: [id])
+  reservations Reservation[]
+}
+
+model Showtime {
+  id          String        @id @default(uuid())
+  movieId     String
+  theaterId   String
+  startTime   DateTime
+  price       Float
+  movie       Movie         @relation(fields: [movieId], references: [id])
+  theater     Theater       @relation(fields: [theaterId], references: [id])
+  reservations Reservation[]
+}
+
+model Reservation {
+  id          String     @id @default(uuid())
+  userId      String
+  showtimeId  String
+  seatId      String
+  status      ReservationStatus @default(ACTIVE)
+  user        User       @relation(fields: [userId], references: [id])
+  showtime    Showtime   @relation(fields: [showtimeId], references: [id])
+  seat        Seat       @relation(fields: [seatId], references: [id])
+  createdAt   DateTime   @default(now())
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CANCELED
 }
